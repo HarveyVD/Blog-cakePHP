@@ -70,7 +70,7 @@ class PostsController extends AppController {
         }
 
         if ($this->request->is(array('post', 'put'))) {
-            $this->Post->id = $id;
+            $this->request->data['Post']['id'] = $id;        
             if ($this->Post->save($this->request->data)) {
                 $this->Session->setFlash(__('Your post has been updated.'));
                 return $this->redirect(array('action' => 'index'));
@@ -78,7 +78,7 @@ class PostsController extends AppController {
             $this->Flash->error(__('Unable to update your post.'));
         }
 
-        if (!$this->request->data) {
+        if (empty($this->request->data)) {
             $this->request->data = $post;
         }
     }
