@@ -38,10 +38,14 @@ class StudentsController extends AppController {
         
     }
 
+    /**
+     * 
+     * chuyển những code trong search vào index phía trên cho đúng chuẩn
+     * những trang danh sách luôn mặc đinh là index
+     */
     public function search() {
         //chuan bi cau truy van query theo cach cua cakePHP
         $this->Paginator->settings = array(
-            
             'limit' => 3,
             'order' => array('id' => 'desc')
         );
@@ -49,12 +53,16 @@ class StudentsController extends AppController {
         // we are using the 'User' model
         $data = $this->Paginator->paginate('Student');
         $this->set(compact('data'));
-        
+
+        // không cần thiết bắt chặt như thế này ở kiểu get
+        // bỏ câu if else này đi
         if (!$this->request->is('get')) {
             throw new MethodNotAllowedException();
         } else {
-            $s = $this->request->query;
-            $full_name = $this->request->query['search_name'];
+            $s = $this->request->query; // không khởi tạo biến thừa như thế này
+            // khi sử dụng $this->request->query[] dấu móc vuông phải cẩn thận, khi không tồn tại sẽ bắn ra notice
+            // sử dụng $this->request->query() dấu móc tròn thì khi không tồn tại sẽ không bắn ra notice, mà sẽ trả về giá trị null
+            $full_name = $this->request->query['search_name']; // đặt tên trường field trong form search không giống với trường field trong database
             $sex = $this->request->query['option'];
             if ($this->request->query['date_start'] != NULL) {
                 $date_start = date('Y-m-d', strtotime($this->request->query['date_start']));
@@ -63,12 +71,19 @@ class StudentsController extends AppController {
                 $date_end = date('Y-m-d', strtotime($this->request->query['date_end']));
             }
             $conditions = array('conditions' => array(
-                    'Student.full_name LIKE' => $full_name,
+                    'Student.full_name LIKE' => $full_name, // search LIKE kiểu như này là search LIKE kiểu chính xác, Tìm hiểu search LIKE theo %%, search chữ hoa hay chữ in thường vẫn search được
                     'Student.sex =' => $sex,
+                    // search birth_day kiểu như này sẽ không tìm kiếm được khi không nhập đủ $date_start và $date_end. 
+                    // làm lại kiểu khi chỉ nhập $date_start sẽ tiềm kiếm các bản ghi có birth_day >= $date_start đó
+                    // hoặc nếu chỉ nhập $date_end sẽ tìm kiếm các bản ghi có birth_day <= $date_end đó, nhập vào cả 2 thì tìm kiếm được trong khoảng birth_day <= $date_end && birth_day >= $date_start
                     'Student.birth_day BETWEEN ? and ?' => array(
                         $date_start, $date_end
                     )
             ));
+
+            // không hiểu mục đích của kiểu foreach này để làm j?
+            // đang định làm hàm tìm kiếm động theo các trường field có trong database ?
+            // giải thích đoạn foreach lồng nhau này, không bao giờ được viết đoạn code nào mà lồng nhau nhiều cấp như thế này
             foreach ($conditions as $key_conditions => $values) {
                 foreach ($values as $key_field => $value_field) {
                     if (!is_array($value_field)) {
@@ -85,6 +100,10 @@ class StudentsController extends AppController {
                 }
             }
         }
+
+        // Phía trên đã dùng 1 truy vấn $this->Paginator->paginate(), dưới này lại dùng find
+        // về ý nghĩa dùng $this->Student->find('all') là hoàn toàn sai, nó không dùng để phân trang
+        // Sửa lại ghép điều kiện $conditions vào chính $this->Paginator->paginate() ở phía trên
         $search = $this->Student->find('all', $conditions);
         $this->set('students', $search);
     }
@@ -106,6 +125,14 @@ class StudentsController extends AppController {
         }
     }
 
+    /**
+     * edit
+     * về bản chất view của edit giống hệt view của add
+     * thế nên xóa view edit.ctp đi, tìm hiểu cách để edit sử dụng được view trong add.ctp
+     * @param type $id
+     * @return type
+     * @throws NotFoundException
+     */
     public function edit($id = null) {
         if ($this->request->referer() != '/') {
             $this->request->data['Student']['referer'] = $this->request->referer();
