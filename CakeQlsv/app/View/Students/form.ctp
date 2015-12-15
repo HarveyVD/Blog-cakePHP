@@ -1,12 +1,13 @@
+ 
+
 
 <div class="container">
-    <h4>Tạo mới sinh viên</h4>
+    <h4>Chỉnh sửa sinh viên</h4>
     <div class="row">
         <div class="col-md-6"> 
             <?php
             echo $this->Form->create('Student', array(
                 'class' => 'form-horizontal',
-                'type' => 'post'
             ));
             ?>
             <div class="form-group">
@@ -35,6 +36,7 @@
                             'placeholder' => 'Ngay sinh',
                             'class' => 'form-control',
                             'type' => 'text'
+                            
                         ));
                         ?>
                         <span class="input-group-addon">
@@ -55,42 +57,39 @@
                     ?>
                 </div>
             </div>
-            <?php 
-            $created = date("Y-m-d H:i:s");
-            echo $this->Form->Input('created',array(
-                'type' => 'hidden',
-                'value' => $created
-            ))
-            ?>
-            <?php echo $this->Form->input('Student.referer', array(
+
+            <?php
+            echo $this->Form->input('Student.referer', array(
                 'type' => 'hidden',
                 'div' => false,
                 'label' => false
-            )) ?>
+            ))
+            ?>
             <div class="form-group">
                 <div class="col-sm-offset-2 col-sm-10">
-                    
-                    <button  type="button" onclick="window.location.href = '<?php echo Router::url($referer);?>'">
+
+                    <button  type="button" onclick="window.location.href = '<?php echo Router::url($referer); ?>'">
                         <span class="glyphicon glyphicon-plus"></span> Huy bo
                     </button> 
-
                     <button type="submit" name="submit" ><span class="glyphicon glyphicon-floppy-saved" aria-hidden="true"></span> Lưu</button> 
                 </div>
             </div>
             <?php
-            
+            echo $this->Form->input('id', array('type' => 'hidden'));
             echo $this->Form->end();
             ?>
         </div>   
     </div>
 </div>
-</div>
+
 <script>
     $(document).ready(function () {
         $(function () {
             $('#datetimepicker1').datetimepicker
                     ({
-                        locale: 'en'
+                        locale: 'en',
+                        
+                        
                     });
         });
     });
